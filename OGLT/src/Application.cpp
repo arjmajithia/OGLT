@@ -115,6 +115,8 @@ int main(void)
         return -1;
     }
 
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
@@ -134,11 +136,14 @@ int main(void)
         2, 3, 0
     };
     
+    unsigned int vao;
+    GLCALL(glGenVertexArrays(1, &vao));
+    GLCALL(glBindVertexArray(vao));
 
     unsigned int buffer;
     GLCALL(glGenBuffers(1, &buffer));
     GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCALL(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    GLCALL(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
     GLCALL(glEnableVertexAttribArray(0));
     GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
@@ -155,15 +160,26 @@ int main(void)
     GLCALL(int location = glGetUniformLocation(shader, "u_Colour"));
     ASSERT(location != -1);
 
+    GLCALL(glBindVertexArray(0));
+    GLCALL(glUseProgram(0));
+    GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     float r = 1.0f;
     float increment = 0.05f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        GLCALL(glUseProgram(shader));
         GLCALL(glUniform4f(location, r, 0.0, 0.2, 1.0));
+
+        GLCALL(glBindVertexArray(vao));
+
+        GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
         //GLClearError();
         GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         //ASSERT(GLLogCall());
@@ -174,7 +190,6 @@ int main(void)
         else if (r < 0.0f)
             increment = -increment;
         r += increment;
-        std::cout << r << std::endl;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
