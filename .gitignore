@@ -36,3 +36,7 @@
 *.sln
 *.pdb
 *.vcxproj
+*.vcxproj.filters
+*.ilk
+*idb
+*.tlog
