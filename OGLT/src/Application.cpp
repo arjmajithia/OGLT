@@ -10,8 +10,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
-
-
+#include "VertexBufferLayout.h"
 
 
 
@@ -55,12 +54,12 @@ int main(void)
         };
 
         
-        VertexArray vao;
+        VertexArray va;
         VertexBuffer vb(positions, 4 * 2 * sizeof(float));
         
         VertexBufferLayout layout;
         layout.Push<float>(2);
-        vao.AddBuffer(vb, layout);
+        va.AddBuffer(vb, layout);
 
 
         /*unsigned int buffer;
@@ -79,10 +78,12 @@ int main(void)
 		shader.Bind();
 		shader.SetUniform4f("u_Colour", 0.8f, 0.3f, 0.8f, 1.0f);
 
-        vao.Unbind();
+        va.Unbind();
 		vb.Unbind();
 		ib.Unbind();
 		shader.Unbind();
+
+		Renderer renderer;
 
         float r = 1.0f;
         float increment = 0.05f;
@@ -91,17 +92,19 @@ int main(void)
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
-            glClear(GL_COLOR_BUFFER_BIT);
+			renderer.Clear();
+            /* glClear(GL_COLOR_BUFFER_BIT); */
 
-            GLCALL(shader.Bind());
-            GLCALL(shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0));
+			shader.Bind();
+            shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0);
 
             // GLCALL(glBindVertexArray(vao));
-            vao.Bind();
-            ib.Bind();
+            /* va.Bind(); */
+            /* ib.Bind(); */
 
             //GLClearError();
-            GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            renderer.Draw(va, ib, shader);
+            /* GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr)); */
             //ASSERT(GLLogCall());
             //glDrawArrays(GL_TRIANGLES, 0, 6);
 
