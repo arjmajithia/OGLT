@@ -8,6 +8,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderPSource
 {
@@ -122,19 +123,19 @@ int main(void)
             2, 3, 0
         };
 
-        unsigned int vao;
-        GLCALL(glGenVertexArrays(1, &vao));
-        GLCALL(glBindVertexArray(vao));
-
+        
+        VertexArray vao;
         VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        vao.AddBuffer(vb, layout);
+
 
         /*unsigned int buffer;
         GLCALL(glGenBuffers(1, &buffer));
         GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         GLCALL(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));*/
-
-        GLCALL(glEnableVertexAttribArray(0));
-        GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
 
         IndexBuffer ib(indices, 6);
 
@@ -150,7 +151,8 @@ int main(void)
         GLCALL(int location = glGetUniformLocation(shader, "u_Colour"));
         ASSERT(location != -1);
 
-        GLCALL(glBindVertexArray(0));
+        vao.Unbind();
+
         GLCALL(glUseProgram(0));
         GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
         GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -166,8 +168,8 @@ int main(void)
             GLCALL(glUseProgram(shader));
             GLCALL(glUniform4f(location, r, 0.0, 0.2, 1.0));
 
-            GLCALL(glBindVertexArray(vao));
-
+            // GLCALL(glBindVertexArray(vao));
+            vao.Bind();
             ib.Bind();
 
             //GLClearError();
