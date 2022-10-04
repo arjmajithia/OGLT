@@ -12,7 +12,8 @@
 #include "Shader.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
-
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 
 int main(void)
@@ -24,7 +25,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 1240, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -42,10 +43,10 @@ int main(void)
 
     {
         float positions[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0.0f, 1.0f
+            100.5f, 100.0f, 0.0f, 0.0f,
+            200.0f, 100.0f, 1.0f, 0.0f,
+            200.0f, 200.0f, 1.0f, 1.0f,
+            100.0f, 200.0f, 0.0f, 1.0f
         }; //square: 0,1,2,2,3,0
 
         unsigned int indices[] = {
@@ -73,14 +74,13 @@ int main(void)
 
         IndexBuffer ib(indices, 6);
 
-        /*unsigned int ibo;
-        GLCALL(glGenBuffers(1, &ibo));
-        GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-        GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW)); */  // can use unsigned char or short, but must be unsigned
+        glm::mat4 proj = glm::ortho(0.0f, 690.0f, -0.0f,540.0f);
+        //glm::mat4 proj = glm::ortho(0.75f, -0.75f, -0.625f, 0.625f);
 
         Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
-		shader.SetUniform4f("u_Colour", 0.8f, 0.3f, 0.8f, 1.0f);
+		// shader.SetUniform4f("u_Colour", 0.8f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformM4f("u_MVP", proj);
 
 		Texture texture("res/textures/logo.png");
 		texture.Bind();
@@ -104,7 +104,7 @@ int main(void)
             /* glClear(GL_COLOR_BUFFER_BIT); */
 
 			shader.Bind();
-            shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0);
+            // shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0);
 
             // GLCALL(glBindVertexArray(vao));
             /* va.Bind(); */

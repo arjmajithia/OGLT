@@ -41,3 +41,6 @@
 *idb
 *.tlog
 OGLT/Debug/
+
+# GLM files
+OGLT/src/3p/glm/
