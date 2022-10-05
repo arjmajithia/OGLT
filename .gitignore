@@ -44,3 +44,6 @@ OGLT/Debug/
 
 # GLM files
 OGLT/src/3p/glm/
+
+# ImGui files
+OGLT/src/3p/imgui/

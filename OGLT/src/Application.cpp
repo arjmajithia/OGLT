@@ -14,6 +14,10 @@
 #include "Texture.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw_gl3.h"
+
+#include "tests/TestClearColor.h"
 
 
 int main(void)
@@ -42,59 +46,70 @@ int main(void)
     glewInit();
 
     {
-        float positions[] = {
-            100.5f, 100.0f, 0.0f, 0.0f,
-            200.0f, 100.0f, 1.0f, 0.0f,
-            200.0f, 200.0f, 1.0f, 1.0f,
-            100.0f, 200.0f, 0.0f, 1.0f
-        }; //square: 0,1,2,2,3,0
+        //float positions[] = {
+        //    -50.0f, -50.0f,  0.0f, 0.0f,
+        //     50.0f, -50.0f,  1.0f, 0.0f,
+        //     50.0f,  50.0f,  1.0f, 1.0f,
+        //    -50.0f,  50.0f,  0.0f, 1.0f
+        //}; //square: 0,1,2,2,3,0
 
-        unsigned int indices[] = {
-            0, 1, 2,
-            2, 3, 0
-        };
+        //unsigned int indices[] = {
+        //    0, 1, 2,
+        //    2, 3, 0
+        //};
 
 
 		GLCALL(glEnable(GL_BLEND));
 		GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
-        VertexArray va;
-        VertexBuffer vb(positions, 4 * 4 * sizeof(float));
-        
-        VertexBufferLayout layout;
-        layout.Push<float>(2);
-        layout.Push<float>(2);
-        va.AddBuffer(vb, layout);
+  //      VertexArray va;
+  //      VertexBuffer vb(positions, 4 * 4 * sizeof(float));
+  //      
+  //      VertexBufferLayout layout;
+  //      layout.Push<float>(2);
+  //      layout.Push<float>(2);
+  //      va.AddBuffer(vb, layout);
 
+  //      IndexBuffer ib(indices, 6);
 
-        /*unsigned int buffer;
-        GLCALL(glGenBuffers(1, &buffer));
-        GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-        GLCALL(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));*/
+  //      glm::mat4 proj = glm::ortho(0.0f, 690.0f, -0.0f,540.0f);
+  //      glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-        IndexBuffer ib(indices, 6);
+		///* glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0)); */
+		///* glm::mat4 mvp = proj * view * model; */
 
-        glm::mat4 proj = glm::ortho(0.0f, 690.0f, -0.0f,540.0f);
-        //glm::mat4 proj = glm::ortho(0.75f, -0.75f, -0.625f, 0.625f);
+  //      Shader shader("res/shaders/Basic.shader");
+		//shader.Bind();
+		//// shader.SetUniform4f("u_Colour", 0.8f, 0.3f, 0.8f, 1.0f);
+  //      // shader.SetUniformM4f("u_MVP", mvp);
 
-        Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
-		// shader.SetUniform4f("u_Colour", 0.8f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformM4f("u_MVP", proj);
+		//Texture texture("res/textures/logo.png");
+		//texture.Bind();
+		//shader.SetUniform1i("u_Texture", 0);
 
-		Texture texture("res/textures/logo.png");
-		texture.Bind();
-		shader.SetUniform1i("u_Texture", 0);
-
-        va.Unbind();
-		vb.Unbind();
-		ib.Unbind();
-		shader.Unbind();
+  //      va.Unbind();
+		//vb.Unbind();
+		//ib.Unbind();
+		//shader.Unbind();
 
 		Renderer renderer;
 
+        ImGui::CreateContext();
+        ImGui_ImplGlfwGL3_Init(window, true);
+        ImGui::StyleColorsDark();
+
+
+		/*glm::vec3 translationA(200, 200, 0);
+		glm::vec3 translationB(400, 200, 0);
+
         float r = 1.0f;
         float increment = 0.05f;
+
+        bool show_demo_window = true;
+        bool show_another_window = false;
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);*/
+
+        test::TestClearColor test;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -103,24 +118,56 @@ int main(void)
 			renderer.Clear();
             /* glClear(GL_COLOR_BUFFER_BIT); */
 
-			shader.Bind();
-            // shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0);
+            test.OnUpdate(0.0f);
+            test.OnRender();
 
-            // GLCALL(glBindVertexArray(vao));
-            /* va.Bind(); */
-            /* ib.Bind(); */
+            ImGui_ImplGlfwGL3_NewFrame();
 
-            //GLClearError();
-            renderer.Draw(va, ib, shader);
-            /* GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr)); */
-            //ASSERT(GLLogCall());
-            //glDrawArrays(GL_TRIANGLES, 0, 6);
+            test.OnImGuiRender();
 
-            if (r > 1.0f)
-                increment = -increment;
-            else if (r < 0.0f)
-                increment = -increment;
-            r += increment;
+			//{
+			//	glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+			//	glm::mat4 mvp = proj * view * model;
+
+			//	shader.Bind();
+
+			//	shader.SetUniformM4f("u_MVP", mvp);
+			//	renderer.Draw(va, ib, shader);
+			//}
+
+   //         /* shader.SetUniform4f("u_Colour", r, 0.0, 0.2, 1.0); */
+
+			//{
+			//	glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+			//	glm::mat4 mvp = proj * view * model;
+
+			//	shader.Bind();
+
+			//	shader.SetUniformM4f("u_MVP", mvp);
+			//	renderer.Draw(va, ib, shader);
+			//}
+
+
+   //         if (r > 1.0f)
+   //             increment = -increment;
+   //         else if (r < 0.0f)
+   //             increment = -increment;
+   //         r += increment;
+
+
+   //         {
+   //             /* ImGui::SliderFloat("float", &f, 0.0f, 1.0f); */
+			//	ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
+			//	ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
+   //             /* ImGui::ColorEdit3("clear color", (float*)&clear_color); */
+   //             
+
+   //             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+   //         }
+
+
+            ImGui::Render();
+            ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -130,6 +177,8 @@ int main(void)
         }
     }
 
+    ImGui_ImplGlfwGL3_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
     return 0;
 }
