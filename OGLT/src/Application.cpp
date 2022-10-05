@@ -17,6 +17,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+#include "tests/Test.h"
 #include "tests/TestClearColor.h"
 
 
@@ -57,10 +58,6 @@ int main(void)
         //    0, 1, 2,
         //    2, 3, 0
         //};
-
-
-		GLCALL(glEnable(GL_BLEND));
-		GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
   //      VertexArray va;
   //      VertexBuffer vb(positions, 4 * 4 * sizeof(float));
@@ -92,15 +89,8 @@ int main(void)
 		//ib.Unbind();
 		//shader.Unbind();
 
-		Renderer renderer;
-
-        ImGui::CreateContext();
-        ImGui_ImplGlfwGL3_Init(window, true);
-        ImGui::StyleColorsDark();
-
-
-		/*glm::vec3 translationA(200, 200, 0);
-		glm::vec3 translationB(400, 200, 0);
+        /*glm::vec3 translationA(200, 200, 0);
+        glm::vec3 translationB(400, 200, 0);
 
         float r = 1.0f;
         float increment = 0.05f;
@@ -109,21 +99,45 @@ int main(void)
         bool show_another_window = false;
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);*/
 
-        test::TestClearColor test;
+
+        GLCALL(glEnable(GL_BLEND));
+        GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+		Renderer renderer;
+
+        ImGui::CreateContext();
+        ImGui_ImplGlfwGL3_Init(window, true);
+        ImGui::StyleColorsDark();
+
+
+		test::Test* currentTest = nullptr;
+		test::TestMenu* Testmenu = new test::TestMenu(currentTest);
+		currentTest = Testmenu;
+
+		Testmenu->RegisterTest<test::TestClearColor>("Clear Color");
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
+			GLCALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
             /* Render here */
 			renderer.Clear();
             /* glClear(GL_COLOR_BUFFER_BIT); */
 
-            test.OnUpdate(0.0f);
-            test.OnRender();
-
             ImGui_ImplGlfwGL3_NewFrame();
-
-            test.OnImGuiRender();
+			if (currentTest)
+			{
+				currentTest->OnUpdate(0.0f);
+				currentTest->OnRender();
+				ImGui::Begin("Test");
+				if (currentTest != Testmenu && ImGui::Button("<-"))
+				{
+					delete currentTest;
+					currentTest = Testmenu;
+				}
+				currentTest->OnImGuiRender();
+                ImGui::End();
+			}
 
 			//{
 			//	glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
@@ -175,6 +189,9 @@ int main(void)
             /* Poll for and process events */
             glfwPollEvents();
         }
+		delete currentTest;
+		if (currentTest != Testmenu)
+			delete Testmenu;
     }
 
     ImGui_ImplGlfwGL3_Shutdown();
